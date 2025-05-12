@@ -47,8 +47,8 @@ public class UsersService {
                 user.setAddress(updatedUser.getAddress());
             }
             if (updatedUser.getPassword() != null) {
-                user.setPassword(passwordEncoder.encode(updatedUser.getPassword())); // يُفضل تشفيرها إذا كنت تستخدم
-                                                                                     // Spring Security
+                user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+
             }
 
             if (updatedUser.getRole() != null) {
@@ -65,7 +65,7 @@ public class UsersService {
     public void deleteUser(Long id) {
         Optional<Users> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
-            userRepository.deleteById(id); // Delete the user by ID
+            userRepository.deleteById(id);
         } else {
             throw new RuntimeException("User not found with ID: " + id);
         }

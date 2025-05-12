@@ -1,6 +1,6 @@
 package com.example.SalesProject.filter;
 
-import java.util.Collections; // هذا الاستيراد يجب أن يكون موجودًا
+import java.util.Collections;
 
 import com.example.SalesProject.entity.Users;
 import com.example.SalesProject.repository.UserRepository;
