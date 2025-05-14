@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.SalesProject.dto.AddInvoice;
-
+import com.example.SalesProject.entity.Clients;
 import com.example.SalesProject.entity.Invoices;
 import com.example.SalesProject.service.InvoicesService;
 
@@ -31,14 +31,14 @@ public class InvoicesController {
     @Autowired
     private InvoicesService invoicesService;
 
-    @GetMapping("/getAllinvoices")
-    @PreAuthorize("hasAnyRole('admin','accountant','salesman')")
+    @GetMapping("/getAll")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<Invoices> getAllInvoices() {
         return invoicesService.getAllInvoices();
     }
 
     @GetMapping("/getInvoiceById/{id}")
-    @PreAuthorize("hasAnyRole('admin','accountant','salesman')")
+    @PreAuthorize("hasAnyRole('admin')")
     public Invoices getInvoiceById(@PathVariable Long id) {
 
         Optional<Invoices> invoice = invoicesService.getinvoicesById(id);
@@ -52,9 +52,9 @@ public class InvoicesController {
         }
     }
 
-    @PostMapping("/addinvoice")
-    @PreAuthorize("hasAnyRole('admin','accountant','salesman')")
-    public ResponseEntity<String> signup(@RequestBody AddInvoice request) {
+    @PostMapping("/add")
+    @PreAuthorize("hasAnyRole('admin')")
+    public ResponseEntity<String> add(@RequestBody AddInvoice request) {
         return ResponseEntity.ok(invoicesService.CreateInvoice(request));
     }
 
@@ -66,13 +66,13 @@ public class InvoicesController {
     }
 
     @GetMapping("/filterByStatus/{status}")
-    @PreAuthorize("hasAnyRole('admin','accountant','salesman')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<Invoices> filterByStatus(@PathVariable String status) {
         return invoicesService.getInvoicesByStatus(status);
     }
 
     @GetMapping("/filterByDate")
-    @PreAuthorize("hasAnyRole('admin','accountant','salesman')")
+    @PreAuthorize("hasAnyRole('admin')")
     public List<Invoices> filterByDateRange(
             @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date start,
             @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date end) {
@@ -81,12 +81,40 @@ public class InvoicesController {
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasAnyRole('admin','accountant')")
+    @PreAuthorize("hasAnyRole('admin')")
     public ResponseEntity<String> updateInvoice(
             @PathVariable Long id,
             @RequestBody AddInvoice newInvoice) {
         String result = invoicesService.updateInvoice(id, newInvoice);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/getSalesInvoice")
+    @PreAuthorize("hasAnyRole('accountant')")
+    public List<Invoices> getSalesClients() {
+        return invoicesService.getAccInvoice();
+    }
+
+    @PostMapping("/addAccInvoice")
+    @PreAuthorize("hasAnyRole('accountant')")
+    public ResponseEntity<String> accAdd(@RequestBody AddInvoice request) {
+        return ResponseEntity.ok(invoicesService.CreateAccInvoice(request));
+    }
+
+    @PutMapping("/Accupdate/{id}")
+    @PreAuthorize("hasAnyRole('accountant')")
+    public ResponseEntity<String> updateAccInvoice(
+            @PathVariable Long id,
+            @RequestBody AddInvoice newInvoice) {
+        String result = invoicesService.updateAccInvoice(id, newInvoice);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("Accdelete/{id}")
+    @PreAuthorize("hasAnyRole('accountant')")
+    public String deleteAccInvoice(@PathVariable Long id) {
+        invoicesService.deleteAccInvoice(id);
+        return "invoice with ID " + id + " has been deleted successfully.";
     }
 
 }
