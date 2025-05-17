@@ -26,4 +26,6 @@ public interface InvoicesRepository extends JpaRepository<Invoices, Long> {
 
     List<Invoices> findByUserId(Long id);
 
+    List<Invoices> findBySalesManId(Long id);
+
 }

@@ -18,11 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.SalesProject.dto.AddClients;
 import com.example.SalesProject.entity.Clients;
 import com.example.SalesProject.service.ClientsService;
+import com.example.SalesProject.service.InvoicesService;
 
 @RestController
 @RequestMapping("api/clients")
 public class ClientsController {
 
+    @Autowired
+    private InvoicesService invoicesService;
     @Autowired
     private ClientsService clientService;
 
@@ -34,7 +37,7 @@ public class ClientsController {
 
     @DeleteMapping("delete/{id}")
     @PreAuthorize("hasAnyRole('admin')")
-    public String deleteInvoice(@PathVariable Long id) {
+    public String deleteClient(@PathVariable Long id) {
         clientService.deleteClient(id);
         return "Client with ID " + id + " has been deleted successfully.";
     }
@@ -49,7 +52,7 @@ public class ClientsController {
     }
 
     @GetMapping("/getAllClients")
-    @PreAuthorize("hasAnyRole('admin')")
+    @PreAuthorize("hasAnyRole('admin','accountant')")
     public List<Clients> getAllClients() {
         return clientService.getAllClients();
     }
@@ -67,6 +70,13 @@ public class ClientsController {
             @RequestBody AddClients newClient) {
         String result = clientService.updateSalesClient(id, newClient);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/latePayments")
+    @PreAuthorize("hasAnyRole('admin','accountant')")
+    public ResponseEntity<List<Clients>> getLatePaymentClients() {
+        List<Clients> lateClients = invoicesService.getLateClientsManual();
+        return ResponseEntity.ok(lateClients);
     }
 
 }

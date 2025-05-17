@@ -26,9 +26,13 @@ public class Users {
     @Column(nullable = false)
     private String role;
 
+    @Column(nullable = false, name = "preferred_currency_id")
+    private Long preferredCurrencyId;
+
     @Column()
     private String phone;
 
     @Column()
     private String address;
+
 }

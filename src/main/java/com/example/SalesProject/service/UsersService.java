@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,9 @@ public class UsersService {
                 user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
 
             }
+            if (updatedUser.getPreferredCurrencyId() != null) {
+                user.setPreferredCurrencyId(updatedUser.getPreferredCurrencyId());
+            }
 
             if (updatedUser.getRole() != null) {
                 user.setRole(updatedUser.getRole());
@@ -68,6 +72,23 @@ public class UsersService {
             userRepository.deleteById(id);
         } else {
             throw new RuntimeException("User not found with ID: " + id);
+        }
+    }
+
+    public Users updateCurrency(Long id) {
+
+        Users currentUser = (Users) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long currentUserId = currentUser.getId();
+
+        Optional<Users> optionalUser = userRepository.findById(currentUserId);
+        if (optionalUser.isPresent()) {
+            Users user = optionalUser.get();
+            user.setPreferredCurrencyId(id);
+
+            userRepository.save(user);
+            return user;
+        } else {
+            throw new RuntimeException("User not found");
         }
     }
 

@@ -11,5 +11,6 @@ public class UpdateUser {
     private String address;
     private String password;
     private String role;
+    private Long preferredCurrencyId;
 
 }

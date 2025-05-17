@@ -117,4 +117,22 @@ public class InvoicesController {
         return "invoice with ID " + id + " has been deleted successfully.";
     }
 
+    @GetMapping("/AccfilterByStatus/{status}")
+    @PreAuthorize("hasAnyRole('accountant')")
+    public List<Invoices> getAccInvoicesByStatus(@PathVariable String status) {
+        return invoicesService.getAccInvoicesByStatus(status);
+    }
+
+    @GetMapping("/getlateInvoice")
+    @PreAuthorize("hasAnyRole('admin')")
+    public List<Invoices> getlateInvoices() {
+        return invoicesService.getAllLateInvoices();
+    }
+
+    @GetMapping("/getSaleslateInvoice")
+    @PreAuthorize("hasAnyRole('salesman')")
+    public List<Invoices> getsaleslateInvoices() {
+        return invoicesService.getAllLateSalesInvoices();
+    }
+
 }

@@ -49,4 +49,10 @@ public class UsersController {
         return "User with ID " + id + " has been deleted successfully.";
     }
 
+    @PutMapping("/editCurrency/{id}")
+    @PreAuthorize("hasAnyRole('admin','accountant','salesman','client')")
+    public Users updateCurrency(@PathVariable Long id) {
+        return userService.updateCurrency(id);
+    }
+
 }

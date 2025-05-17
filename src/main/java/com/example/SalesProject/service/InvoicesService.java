@@ -1,8 +1,12 @@
 package com.example.SalesProject.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +17,7 @@ import com.example.SalesProject.dto.AddInvoice;
 import com.example.SalesProject.entity.Clients;
 import com.example.SalesProject.entity.Invoices;
 import com.example.SalesProject.entity.Users;
+import com.example.SalesProject.repository.ClientsRepository;
 import com.example.SalesProject.repository.InvoicesRepository;
 
 @Service
@@ -20,6 +25,9 @@ public class InvoicesService {
 
     @Autowired
     private InvoicesRepository invoicesRepository;
+
+    @Autowired
+    private ClientsRepository clientsRepository;
 
     public Optional<Invoices> getinvoicesById(long id) {
         return invoicesRepository.findById(id);
@@ -33,6 +41,7 @@ public class InvoicesService {
         Invoices invoice = new Invoices();
 
         invoice.setAmount(newInvoice.getAmount());
+        invoice.setClientId(newInvoice.getClientId());
         invoice.setStatus(newInvoice.getStatus());
         invoice.setNote(newInvoice.getNote());
         invoice.setDueDate(newInvoice.getDueDate());
@@ -70,6 +79,10 @@ public class InvoicesService {
             if (newInvoice.getUserId() != null) {
                 invoice.setUserId(newInvoice.getUserId());
             }
+            if (newInvoice.getClientId() != null) {
+                invoice.setClientId(newInvoice.getClientId());
+            }
+
             if (newInvoice.getInvoiceNumber() != null) {
                 invoice.setInvoiceNumber(newInvoice.getInvoiceNumber());
             }
@@ -107,6 +120,7 @@ public class InvoicesService {
         Long AccId = user.getId();
 
         invoice.setAmount(newInvoice.getAmount());
+        invoice.setClientId(newInvoice.getClientId());
         invoice.setStatus(newInvoice.getStatus());
         invoice.setNote(newInvoice.getNote());
         invoice.setDueDate(newInvoice.getDueDate());
@@ -141,6 +155,9 @@ public class InvoicesService {
         if (newInvoice.getStatus() != null)
             invoices.setStatus(newInvoice.getStatus());
 
+        if (newInvoice.getClientId() != null)
+            invoices.setClientId(newInvoice.getClientId());
+
         if (newInvoice.getNote() != null)
             invoices.setNote(newInvoice.getNote());
 
@@ -163,6 +180,60 @@ public class InvoicesService {
         } else {
             throw new RuntimeException("Invoice not found with ID: " + id);
         }
+    }
+
+    public List<Invoices> getAccInvoicesByStatus(String status) {
+        Users currentUser = (Users) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long currentUserId = currentUser.getId();
+        List<Invoices> optionalInvoice = invoicesRepository.findByStatus(status);
+
+        List<Invoices> filteredInvoices = optionalInvoice.stream()
+                .filter(invoice -> invoice.getUserId().equals(currentUserId))
+                .collect(Collectors.toList());
+
+        return filteredInvoices;
+    }
+
+    public List<Clients> getLateClientsManual() {
+        List<Invoices> unpaidInvoices = invoicesRepository.findByStatus("unpaid");
+
+        List<Long> lateClientIds = unpaidInvoices.stream()
+                .filter(invoice -> invoice.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                        .plusDays(14).isBefore(LocalDate.now()))
+                .map(Invoices::getClientId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (lateClientIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        System.out.println("Late Client IDs: " + lateClientIds);
+
+        return clientsRepository.findAllById(lateClientIds);
+    }
+
+    public List<Invoices> getAllLateInvoices() {
+        Date today = new Date();
+        List<Invoices> all = invoicesRepository.findAll();
+        return all.stream()
+                .filter(invoice -> invoice.getDueDate() != null &&
+                        invoice.getDueDate().before(today))
+                .collect(Collectors.toList());
+
+    }
+
+    public List<Invoices> getAllLateSalesInvoices() {
+        Date today = new Date();
+        Users currentUser = (Users) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long SalesId = currentUser.getId();
+        List<Invoices> all = invoicesRepository.findAll();
+        return all.stream()
+                .filter(invoice -> invoice.getSalesManId() != null &&
+                        invoice.getSalesManId().equals(SalesId) &&
+                        invoice.getDueDate().before(today))
+                .collect(Collectors.toList());
+
     }
 
 }

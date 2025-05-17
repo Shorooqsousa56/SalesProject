@@ -16,7 +16,10 @@ public class Invoices {
     private Long id;
 
     @Column(name = "user_id", nullable = false)
-    private long userId;
+    private Long userId;
+
+    @Column(name = "client_id", nullable = false)
+    private Long clientId;
 
     @Column(name = "invoice_number", nullable = false)
     private String invoiceNumber;
@@ -29,6 +32,9 @@ public class Invoices {
 
     @Column(name = "due_date", nullable = false)
     private Date dueDate;
+
+    @Column(name = "sales_man_id", nullable = false)
+    private Long salesManId;
 
     @Column()
     private String note;
